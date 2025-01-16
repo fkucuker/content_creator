@@ -1,0 +1,237 @@
+$8 trillion that's the predicted cost of
+cyber crime in 2023 it is an
+incomprehensibly large cost of society
+to put into further context the annual
+cost of cyber crime is larger than the
+GDP of Canada Russia Brazil and UK put
+together the amounted scale of cyber
+attacks and data breaches in recent
+years is staggering so in this video
+we're going to take a look at some of
+the most common cyber security attacks
+in 2023 break down how they work and
+understand how to protect yourself
+against these attacks in 2024 the five
+most common cyber attacks are fishing
+ransomware Doos SQL injection and
+malware let's start with fishing fishing
+is one of the most common types of cyber
+security attacks in the world fishing
+involves a hacker typically masquerading
+as a trustworthy entity trying to trick
+you into volunteering your sensitive
+information such as login credentials
+and credit card numbers fishing scams
+trick victims by using social
+engineering to create the sense of
+urgency and because several people in
+your organization may receive it at the
+same time it's even more dangerous and
+if even one person clicks on the
+malicious link inside that communication
+that's when the House of Cards really
+starts to topple hackers when we quick
+to ask you to submit personal details or
+fake website they might have made up or
+send money to accounts that you trust
+but actually belong to them to see this
+in the real world let me introduce you
+to alvus nimus an all assuming
+50-year-old n Ian man he may not seem
+like much but over just a 2ear span and
+with just one simple fishing trick Al
+stored more than $12 million from
+Facebook and Google so how do you do it
+well alidis impersonated a legitimate
+Hardware supplier from Asia which
+Facebook and Google did routine business
+with and sent fishing mails to the
+employees of these tech companies in
+these mails he would raise fraudulent
+invoices posing as the hardware company
+asking employees of face Facebook and
+Google to transfer money into bank
+accounts that he created that had the
+same name as the original Hardware
+supplier and he got away with this for
+nearly 2 years from 2013 to 2015 there's
+a variety of fishing attacks some with
+fun fun related names like spear fishing
+and whale fishing other examples include
+clone fishing fishing link manipulation
+filter evation and website forging so
+how do you protect yourself against a
+fishing attack in 2024 experts recommend
+some best practices to avoid fishing
+always start with staff training human
+error was the cause of 90% of data
+breaches in 2019 so always train your
+staff to verify sender details never
+click on suspicious links and beware of
+emails that request sensitive
+information in an urgent manner number
+two ransomware ransomware very simply
+put is a type of malicious software
+designed to deny you access to your own
+computer or data until a ransom is paid
+and the 2020s have been wife with it to
+understand what ransomware looks like
+imagine your 5-year-old takes your phone
+and refuses to give it back to you until
+you give them a treat now imagine this
+happening 500 million times a year and
+instead of toddlers eats hackers and
+instead of treats eats billions of
+dollars ransomware can paralyze entire
+infrastructures cause major downtime
+digal intellectual property theft and so
+much more the most popular real world
+example of landm is War Cry released in
+2017 warry targeted computers running
+Windows operating systems it then locked
+users out of their systems and would ask
+for a payment often hundreds of dollars
+in order to give users back their access
+there's four broad types of ransomware
+scareware screen lockers encryption
+ransomware and mobile ransomware the
+best ways to tackle transfer is to
+eliminate points of failure so regularly
+back up your data always keep your
+software updated and use utable
+antivirus software to provide
+unauthorized applications from executing
+in the first place if you attacked
+exports also recommend not paying as
+that only increases the incentive for
+further attacks like that to take place
+number three dos attacks one of the more
+popular tropes in movies dos is an
+abbreviation for distributed denial of
+service in a Dos attack multiple
+compromised computer systems attack a
+single Target such as a server or a
+website overloading it and causing a
+denial of services for other users a
+dados attack can disrupt any service
+connected to the internet such as
+Network databases mobile devices and
+even specific application functions as a
+result a DS attack can lead to
+significant operational financial and
+reputational dages unlike fishing in
+malware there's no one simple way to
+prevent a DS attack not only are
+companies constantly under attack the
+scale and frequency of these attacks
+have gotten exponentially larger over
+the years too in 2022 Google blocked
+what it called the largest dos attack
+ever executed the very next year another
+dos attack took Place against Google
+except this one was 7 and 1 half times
+larger in volume than the previous
+there's three broad kinds of Dos attacks
+volume based protocol Network layer
+based and application layer based
+attacks to protect against DS attacks
+experts recommend companies employ Doos
+Production Services and manage Network
+infrastructure so that it can handle
+unexpected traffic spikes number four
+SQL injection to understand SQL
+injection it helps to understand what
+SQL is we stands for structured query
+language and it's a popular programming
+language used to manage online databases
+it is incredibly powerful and popular as
+a tool what makes it dangerous well
+businesses often use SP and databases to
+store sensitive information like user
+names password credit card information
+and other important data in poorly
+designed websites with inadequate input
+validation or web page or app will have
+a user input directly into an SQL query
+this is a problem because hackers can
+feed cust inputs to the database in
+question and gain access or manipulate
+the databases as recently as 2015 talkop
+a UK based phone and Broadband provider
+suffered a major SQL injection attack
+leading to the theft of personal data of
+around 150,000 customers the direct and
+indirect cost of the attack to the
+company total nearly $100 million
+there's three types of SQL injections
+based on the methods that attackers use
+to access backend data inband SQL
+injection blind s injection and out of
+band SQL injection there's several ways
+to prevent SQL injection including using
+secure coding practices parameterized
+queries and object relational mapping
+number five malware malware is one of
+the most well-known types of cyber
+security attacks and is at its core any
+program or file that is harmful to a
+computer you probably already know some
+these types of malas computer viruses
+worms trojen horses spyware adware and
+more Stu net is probably one of the most
+famous Industrial scale examples of
+malware in history a highly
+sophisticated computer worm that
+targeted Iran's nuclear program it
+caused substantial damage to Iran's
+nuclear centrifuges significantly
+setting back the country's nuclear
+program different kinds of malware do
+different things but at the end of the
+day malware seeks to damage disrupt or
+gain unauthorized access to computer
+systems in doing so it can take partial
+of full control over a devices
+operations leading to sensitive data
+leaks spying and blackware malware is
+frequently installed on computers by
+Shady internet downloads or USB drives
+which automatically install the program
+without the useen any malware is a cyber
+security RIS whether the purpose of the
+malware is to steal sensitive
+information expose key stropes or even
+just mind cryptocurrency there's several
+ways to protect yourself against malware
+including using reputable antivirus
+software keeping systems updated and
+being cautious of unsolicited downloads
+and educating users and employees about
+safe Computing practices one great way
+to have your cyber security Basics
+covered is by undertaking a cyber
+security audit this could be n53 n CSF
+soft 2 ISO 370001 and much more and if
+you're looking to get compliant with any
+kind of framework look no further than
+compliance Automation and Sprinter
+Sprinter helps companies get compliant
+with over 15 plus Frameworks by
+digitizing and automating the compliance
+process this means that you can get
+compliant faster and more effectively in
+stay compliant to year round instructure
+during an audit cycle improving your
+cyber security companies just like yours
+that get compliant with Sprinter save up
+to 80% of their time effort and cost
+during the compliance process to Le more
+visit sprint.com or book a demo directly
+with our cyber security and compliance
+experts using the link in the
+description below as always if you have
+any questions feel free to leave them in
+the comments we'll get back to you as
+soon as
+[Music]
+possible

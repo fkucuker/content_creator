@@ -1,0 +1,64 @@
+cyber threats in 2024 reached
+unprecedented levels impacting healthare
+finance and even global politics here
+are the top 10 cyber attacks that Define
+the year and lessons we can learn from
+them in February the ALF black cat
+ransomware group disrupted healthc care
+across the United States exposing the
+sensitive Medical Data of 100 million
+people the company paid a $22 million
+Ransom to recover
+operations a breach onow flakes Cloud
+platform exposed accounts for major
+companies like atdt and Ticketmaster
+attackers linked to scattered spider
+stole terabytes of data extorting
+millions in the
+process China's volt typhoon targeted us
+infrastructure while salt typhoon hacked
+Telecom providers like atand DT to spy
+on political figures these attacks
+highlighted growing geopolitical cyber
+tensions this March supply chain attack
+embedded malicious code into a
+compression tool threatening thousand
+thousands of systems globally
+fortunately it was mitigated in
+time hackers sold 2.9 billion records of
+personal data from national public data
+for $3.5 million on the dark web the
+breach exposed Social Security numbers
+phone numbers and
+more a faulty update caused Global it
+outages affecting 8.5 million devices
+industries from Airlines to hospitals
+experience disruptions with damages
+reaching $5.4 billion
+Pro Palestinian hackers breached the
+internet archive exposing 31 million
+files this attack combined data breaches
+with DOs campaigns targeting critical
+us-based
+organizations state-backed Hackers from
+Russia China and Iran tried over 20
+times to misuse open AI tools like chat
+GPT for fishing and malware development
+revealing the risks of AI and cyber
+warfare in May Dell confirmed the
+exposure of 49 million customer records
+including names and addresses the stolen
+database was offered online for
+$500,000 Russian group midnight blizzard
+also known as
+a29 accessed emails of Microsoft
+Executives stealing sensitive corporate
+data the Espionage campaign began in
+late 2023 and was uncovered in January
+2024 these attacks show the rising
+sophistication of cyber threats to
+protect against them organ organizations
+must invest in multiactor authentication
+regular vulnerability checks and
+employee training the stakes have never
+been higher

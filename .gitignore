@@ -1,0 +1,16 @@
+# .env dosyasını yoksay
+.env
+
+# Python virtual environment
+venv/
+.env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# IDE specific files
+.idea/
+.vscode/

@@ -1,0 +1,19 @@
+# Temel Bağımlılıklar
+requests==2.31.0              # HTTP istekleri için
+python-dotenv==1.0.1          # .env dosyasından ortam değişkenlerini yüklemek için
+tqdm==4.66.1                  # İlerleme çubuğu göstermek için
+
+# YouTube Transkript İndirme
+youtube-transcript-api==0.6.1 # YouTube transkriptlerini indirmek için
+
+# Google API İstemcisi (YouTube API için)
+google-api-python-client==2.104.0  # YouTube API'sine erişmek için
+google-auth==2.23.3                # Google API kimlik doğrulaması için
+google-auth-oauthlib==1.0.0        # OAuth2 kimlik doğrulaması için
+google-auth-httplib2==0.1.0        # HTTPLib2 ile kimlik doğrulaması için
+
+# OpenAI API (DALL·E 3 için)
+openai==1.59.7                      # OpenAI API'sini kullanmak için
+
+# WordPress REST API için Ek Bağımlılıklar
+# (requests ve python-dotenv zaten yüklü)

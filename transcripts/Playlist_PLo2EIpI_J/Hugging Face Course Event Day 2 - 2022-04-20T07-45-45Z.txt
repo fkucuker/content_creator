@@ -1,0 +1,3069 @@
+welcome everyone to this second
+community event uh
+i hope you're not too tired from the day
+of talk to us yesterday i'm silva i'm a
+research engineer at talking face and
+i've led the team that developed the
+increased course we're very excited to
+release part two of the course with
+content that you debut tackle nalp task
+and i'll cause today's event with lewis
+lewis if you want to introduce yourself
+yeah good day everyone thanks silvan i'm
+a machine learning engineer in the open
+source team at hugging face and i've
+been working with silvana and the team
+to build on the content for this course
+as well
+so
+to get started i thought i'd just share
+how we're going to do the questions
+today so if it was
+your first time joining us then what you
+need to do is go to the hugging face
+forums
+and if you click on the course category
+you'll see that we have a bunch of
+topics for each of the speakers today
+and so for example today i think i'm
+going first so you can go to this topic
+and then you can ask you know whatever
+question you want it doesn't just have
+to be about the the talk go go ahead ask
+whatever you want and then um we'll base
+the voting on the number of likes per
+question just in case there are lots of
+questions that people want to ask
+so that's the main housekeeping thing
+and with that i think we can kick the
+event off
+yes
+so thanks lewis and yeah
+let me introduce the first keeper lewis
+and louise is a machine and learning
+engineer at the face focused on
+developing open source stores and making
+them accessible to the wider community
+and is also the culture of an upcoming
+already book on transformers that you
+should definitely read
+and today you will talk to us about how
+easy it is to start training with the
+aging phase transformers trainer
+so let's go out of the way and i'll show
+we'll show your talk
+good day this is lewis from hugging face
+and today i'm going to be talking to you
+about the trainer in the transformers
+library
+now you probably encountered this
+subject in part one of the course but if
+it's the first time you've ever heard of
+the trainer don't worry i'll explain
+what it's all about
+so as you can probably guess by the name
+the trainer is for training models
+and what it does is it provides a high
+level abstraction
+to simplify all of the kind of
+boilerplate code that you typically have
+to write when you make your own training
+loops
+in deep learning
+so
+in addition to a model our data sets you
+provide some hyper parameters some
+metrics
+and it takes all of this and then gives
+you some methods that let you train
+evaluate and make predictions using the
+same object
+so there's a couple of times where maybe
+you don't want to use a trainer the
+first one is that the trainer is based
+on pytorch so if you're not using
+pytorch you're going to need to
+check out for example matt's video where
+he shows you how to train transformers
+using keras and tensorflow
+the other case is where sometimes your
+logic can be very specific or you need
+some fine grain control over the
+training loop and in those cases you
+should use the accelerate library which
+sylvan is also talking about today so
+you should check out his talk as well
+okay with that let's dive in and look at
+how the trainer works
+so
+to get started we need a data set and
+the data set i've picked today is called
+the emotion data set which is a data set
+of tweets which have been given or
+labeled with a different set of emotions
+ranging from things like joy to anger or
+disgust
+so we can pull this data set from the
+hub using the load dataset function
+and you can see here that we've got
+three splits
+and we've got a fair amount of data to
+play with we've got 16 000 examples to
+train on so this is a pretty good sized
+data set for fine tuning
+now if we look inside the first element
+of the training set
+you'll see that in the data sets library
+every kind of row is represented as a
+dictionary
+by default
+and
+the values or say the columns of this
+data set are represented as the keys and
+the values are the actual values of the
+rows
+but you know a lot of the time when i'm
+doing this kind of initial exploration
+or trying to understand you know
+um can i visualize some aspects of the
+data i usually prefer doing this in
+pandas it's a little bit more flexible
+for this kind of application
+so the cool thing about the datasets
+library is it lets us switch easily
+between these different formats and one
+way to do that is to just apply the two
+pandas function
+to the data set and voila
+we now have about a frame
+in data frame we've got some tweets
+and we've got some labels which are
+presumed
+but it's not super obvious you know
+what these numbers really mean
+so
+a very
+quick way to figure out what's going on
+is to inspect the features of the data
+set
+so
+the features will tell us what data
+types are being used for each column in
+the data set
+so you can see here that the text column
+is basically a string as we would expect
+but the label column is something
+special called a class label data type
+so this class label data type
+it has some special features it has some
+attributes for example we can see that
+already there are the names of of the
+emotions here
+but what i really want to know is what
+are the relationships between
+like numbers like 0 3 and 2 and the
+actual names
+and this class label
+data type has a function called into
+string which does that for us
+so here it says
+the label id 0 is corresponding to
+sadness
+and so what i can do is i can create a
+mapping that just relates every single
+label id to the corresponding label name
+so here i've just created a dictionary
+using this interstring function
+and now we know that for example zero
+sadness five is surprise and everything
+in between
+and we while we're at it we can also go
+the other way around and provide the
+relationship of the name to the id
+and the reason i'm creating these
+mappings is because when we do
+text classification with transformers
+it's really useful if we provide these
+mappings to the model so that then when
+we want to do inference
+instead of just getting a prediction of
+a zero a three or a two we actually get
+a prediction for the actual name of the
+emotion so this is a really common thing
+that we're going to need to provide to
+the model and it's always good to do it
+straight up
+now the other thing i do in test
+classification problems is i just
+inspect the distribution of classes like
+what are the frequencies
+so in pandas you can do this with the
+value counts method
+and what you can see is that the data
+set is very imbalanced so for example
+the
+label or the class 0
+which is sadness is represented roughly
+30
+um through the data
+the same is true for joy so that's
+another third of the data um has been
+labeled as joy but then like the last
+one which is surprise has only you know
+been given the label or there are only
+roughly four percent of the tweets are
+actually given the surprise label
+so if we train a model just kind of
+naively on this distribution
+one problem that can happen is that the
+model will just
+get very good at predicting these
+majority classes
+but it will struggle a lot on these rare
+classes and so if these classes are
+important for some application that
+you're building you're going to have
+some sort of inferior performance on
+those
+now there's a couple of techniques that
+people
+use to handle this
+the first one is to kind of modify the
+data itself so for example we could
+up sample the rare classes by just
+duplicating
+the examples until we get kind of an
+even distribution
+but the downside with that is that deep
+learning models like transformers are
+really good at memorizing or you know
+discovering patterns in the data
+and so if we duplicate a lot of examples
+then probably the model is going to kind
+of memorize those duplicates and when it
+sees examples from that class in
+production it's actually not going to
+generalize very well
+so what we're going to do today is we're
+actually going to
+modify the loss function
+of the model during training
+and this will allow us to then
+kind of introduce a bias directly at the
+level of loss function
+which indicates you know these are the
+way that the classes are distributed and
+hopefully this will encourage the model
+to pay more attention to these rare
+classes
+but before we jump into that let's uh
+just prepare our data set
+and you probably remember
+that the first thing
+you need to do in most nlp problems is
+tokenize the data so that it gets into a
+format that's suitable for training
+and the model i'm going to use today is
+called mini lm
+now
+if you go to the model hub there are
+thousands of models
+here you can see that there's roughly 32
+000 models this is not all the public
+models it includes private ones as well
+but in any case you can see that bert
+bay is currently the most popular model
+on the hub
+and that's maybe not so surprising
+because burt was like the first
+transformer that really you know took
+over nlp
+but you know
+the field moves fast and this model may
+be kind of outdated
+and to kind of
+show you that there's a really
+interesting paper called mini lm by
+microsoft and they showed that
+you can take a kind of burt model and
+you can compress it into a smaller
+version
+called mini lm
+and so here you can see that bert has
+roughly 110 million parameters and they
+were able to reduce this to 66 million
+parameters so almost half the size
+but the cool thing is that if you look
+at the performance
+um mini lm
+averaged over all these kind of
+core nlp benchmarks only really drops
+one percentage point compared to bert
+you know which is quite impressive it's
+roughly twice as fast because it's twice
+as small but it barely loses any
+performance
+so
+my advice is maybe don't use bert don't
+reach for burt the first time maybe pick
+one of these uh faster and you know
+models like minilim
+or distilbert and you'll typically find
+that you can then iterate much faster in
+your experiments because you know
+they're faster to train
+so i'm going to use the minielm model
+and i just pick
+the pre-trained checkpoint from the hub
+now once we have a tokenizer we can feed
+in an example and we can see that okay
+we're now getting input ids so these are
+like the sort of tokenized inputs that
+we're going to feed to the model
+we have token type ids which are kind of
+common with burp models to indicate
+whether we have a um you know a sentence
+one or sentence two
+and then there's the attention mask
+which is used to indicate you know which
+tokens correspond to padding or not
+but this is all covered in part 1 of the
+course so go check that out if this is
+unfamiliar
+but the thing that we want to do is we
+want to apply this tokenizer to all the
+examples in the dataset
+and the datasets library
+provides a map method which is a
+powerful way of just providing a
+function and applying that function to
+all the examples
+so here what i'm doing is i've defined a
+function called tokenized text which
+will take some inputs
+it will tokenize them just as we did
+before
+and the other thing i'm going to do is
+i'm going to truncate
+any of the long examples
+because every transformer model has a
+maximum sequence size it can process
+and by specifying the truncation we can
+then ensure that we don't get any errors
+during training
+so if i go ahead and do that
+i'll get now
+a tokenized data set and you can see
+that indeed we've now added some new
+columns sorry the input ids and circuit
+type ids which correspond to the
+objects that we want to use
+you know during training
+so without further ado let's think about
+you know how to handle this question of
+class and balance
+so
+the way we could do this is we can say
+okay in the data there's some frequency
+distribution
+and i'm going to then introduce some
+kind of weights or let's say
+coefficients for the loss function which
+will multiply each one of those classes
+by an amount reflected in the data
+and if we demand that these coefficients
+range from zero to one then intuitively
+we
+and a low weight to the common classes
+so this way the model doesn't get kind
+of too bad
+biased do is we can use
+the value counts function from pandas
+and so
+from one
+normalizes by the number of sentences
+then this will provide us with this kind
+of cautions which go from 0 to 1 just as
+we wanted
+so if we do that we can see that okay
+the first
+has been normalized to be multiplied by
+0.7
+um
+so this will hopefully boost the signal
+train
+and
+because the trainer is based on pie
+torch we ultimately want all of these
+weights to be torch tensors so i'm just
+going to convert this from a numpy array
+into a torch tensor and while we're at
+it we're going to put it on the gpu
+because that's ultimately you know where
+we want to do the training
+and just one last thing
+to sort of
+take note of is that
+the trainer you need to indicate kind of
+which column
+corresponds to the targets in this case
+the labels
+and in particular if we look at the
+documentation
+we can see that
+your model can compute the loss if a
+label's argument is provided so what i'm
+going to do
+is i'm going to rename the label column
+to labels and then we'll be good to go
+okay so
+we now have
+the ingredients we need to define our
+trainer
+and what i'm doing here is i'm going to
+create a custom trainer so that we can
+do this kind of custom loss computation
+so in the documentation what we're told
+is that if you want to inject custom
+behavior into the training loop you can
+subclass any of these methods here
+and
+we're interested in the compute law
+so what i'm doing here is i'm
+the weight loss trainer i'm subclassing
+the trainer
+and
+i just need to then input my logic to
+compute this weighted loss so we can do
+this is we can feed
+these outputs the logits
+which is what we ultimately wanted to
+compare
+pair with the labels
+we get the labels
+hello everyone i think we're having some
+uh technical goodies
+so yeah we have some ideas
+i i suggest we uh we just pick up where
+i was and i'll just uh wing it
+i mean can you can you just try can you
+just try once from your your laptop i
+think i'm i have some streaming issues
+on my on my hand
+so maybe it will work better if you try
+to stream the videos in my place and you
+are around 12 minutes i'm very sorry
+about the
+quality a smaller version i'm called
+i'm going to truncate
+so 12 minutes you said yeah you were
+around there
+all right and
+because the trainer is based on pie
+torch we ultimately want all of these
+weights to be torch tenses so i'm just
+going to convert this from a numpy array
+into a torch tensor and while we're at
+it we're going to put it on the gpu
+because that's ultimately you know where
+we want to do the training
+and just one last thing
+to sort of
+take note of is that
+the trainer you need to indicate kind of
+which column
+corresponds to the targets in this case
+the labels
+and in particular if we look at the
+documentation
+we can see that
+your model can compute the loss if a
+label's argument is provided so what i'm
+going to do
+is i'm going to rename the label column
+to labels and then we'll be good to go
+okay so
+we now have
+the ingredients we need to define our
+trainer
+and what i'm doing here is i'm going to
+create a custom trainer so that we can
+do this kind of custom loss computation
+so in the documentation what we're told
+is that if you want to inject custom
+behavior into the training loop you can
+subclass any of these methods here
+and then input any sort of logic that
+you want
+and so the one that we're interested in
+is the compute loss method because we
+want to compute our loss function
+and so what i'm doing here is i'm just
+creating a new
+class called the weighted loss trainer
+i'm subclassing the trainer
+and i just need to then input my logic
+to compute this weighted loss so the way
+we can do this is we can feed the inputs
+to the model to get the outputs we can
+then extract from these outputs the
+logits
+which is what we ultimately wanted to
+compare with the labels
+we get the labels
+and then in pi torch there's a loss
+function called cross entropy loss where
+you can provide an actual weight
+corresponding to these class weights
+that we computed earlier
+and once we have our loss function we
+can then compute the loss directly
+and we just need to return
+you know the loss if
+the function just returns loss by itself
+or in some cases we also need to return
+the model outputs and that's indicated
+here by this return outputs flag
+so now we've got our trainer we can just
+go ahead and fill in the missing pieces
+that we need
+and those missing pieces are kind of
+described
+pieces so
+we can instantiate a model using the
+from pre-trained method
+and because we're dealing with text
+classification we're going to treat this
+as a sequence classification task
+and here you can see that in addition to
+the pre-trained checkpoint that we use
+for the tokenizer i'm also providing the
+number of labels that are associated
+with the dataset
+and also the mappings from the label ids
+to the label names
+so this will instantiate the model
+then we need to metrics and here i'm
+using the f1 score from socket loan and
+the reason for that is that if you're
+dealing with imbalanced data the
+accuracy will be biased towards the
+majority class and give you kind of like
+a false or inflated
+score whereas the f1 score is sort of
+like the mean of precision and recall
+and this is a better way
+of kind of trading off um
+these these are imbalances
+so this function you would have seen in
+part one but basically we extract the
+labels and the predictions we feed them
+into our metric and then we just return
+a dictionary which has that metric so
+that's pretty straightforward
+and then the last thing we need to
+provide are the hyper parameters so
+here the main thing you need with the
+training arguments is you need to
+provide an output directory
+which is going to save all the
+checkpoints so the model the tokenizer
+the configuration some other files
+but we also can specify other things for
+example the number of epochs we want to
+train
+the learning rate
+and one thing that's really good to know
+is for example whether you use mixed
+precision so if your gpu supports mixed
+precision training you should always use
+fp16 true to make it go fast
+and the last thing we want to do is we
+want to push our model to the hub
+during training so all the checkpoints
+we can just push them automatically to
+the hub with push to hub true
+and you'll find that model um basically
+in the same location on your account as
+the name of this output directory
+and we'll see that in a minute or so
+so once we've got the model the hyper
+parameters the metrics the data sets we
+feed all of these into the trainer
+and here it's just the same
+signature that we would have used for a
+vanilla trainer but we've now got our
+custom trainer with our custom loss
+and once we instantiate the trainer it
+will create a repository on the hunting
+face hub
+it will then clone it and then
+in our local directory it will use that
+to store all of these checkpoints during
+training
+so now we can train the model
+and it's just a one-liner
+and this takes around five minutes on my
+gpu
+and you can see that during training you
+know the loss has gone down which is
+great and the f1 score has gone up so
+you can see that after five epochs we
+now get around 92 f1 score which is
+great
+um and we can then actually
+check out our model um on the hub
+and we can see that you know we've um
+we've got like an inference widget so we
+can for example
+inspect
+you know what are the outputs
+for some inputs so here's some test
+which says you know i like you i love
+you
+and indeed we would expect this to be
+about love that's what we see
+and we also have some information about
+the training
+which was you know stored in the trainer
+and then saved into the model card so
+this is this is all you know really
+useful information
+now at the end of training you might
+want to
+use this model in your own application
+and so for that you should use the
+pipeline function
+and so here we just provide to the
+pipeline function the checkpoint that
+we've created
+we're doing text classification
+and once you have that you can provide
+some text and see what the outputs are
+yourself so indeed if i'm really excited
+about part two lagging face course this
+should be joy
+and that's basically it we've created
+our own trainer
+marine customer trainer by overwriting
+some functions
+and you know you should now have all the
+tools you need to work on your own
+projects i look forward to seeing you in
+the forums and on discord
+hello everyone welcome back sorry for
+these technical difficulties
+yeah sorry about that it should be
+better right now we figured out a way to
+to stream the videos without uh
+them being like with the sound
+completely disconnected from the video
+so thanks for your talk uh lewis
+and we have a couple of questions for
+you
+uh
+the first one is
+you use the datasets library in your
+talk but can i use my own datasets with
+the trainer
+yes you can so um basically you can
+actually use the datasets library to
+load your own data sets
+for example
+if you have your data set stored as a
+csv file then the datasets library lets
+you load this in a good format and then
+you can just tokenize this and feed it
+into the trainer as you wish
+um but you could also if you wished um
+you know use your own like sort of pie
+torch data sets that would also
+work
+i mean sylvan is the creator of the
+trainer so he can always uh override me
+with uh true wisdom
+no that seems correct
+um another question we had on the forums
+is um
+you suggest changing birth base for many
+lm as baseline pre-trained model is very
+an analogous recommendation for
+multilingual models which checkpoints
+should be the go-to
+yeah that's a great question so um this
+is certainly something that i think
+happens almost any time you're working
+outside of the us and you have to deal
+with multiple languages and for me
+personally like a very strong baseline
+for this is xlm roberta
+it's a it's a model from facebook that
+was trained on 100 languages in parallel
+and it um gets
+quite good results and
+it does better than for example
+multilingual bert which was one of the
+first multilingual transformers so
+that's probably what i would use if i
+was starting out
+thanks
+another question we have is um how can
+we debug
+something when something goes wrong with
+the trainer
+well you should go to chapter eight of
+the course and watch the video where
+sylvan walks you step by step on how to
+do this
+um but you know in just to give you a
+high level summary i mean it's a it's a
+training kind of loop or pipeline and
+there's several places things can go
+wrong
+so the first thing that you should
+always check is is the data um in its
+right format so a really common mistake
+that i myself make it almost all the
+time is i forget to tokenize the data
+and then you're just trying to feed
+strings to the model and it gets
+confused
+another thing that can go wrong is maybe
+the the name of your labels column isn't
+right so you saw in the tutorial i had
+to change this um to make it work kind
+of out of the box
+um and then of course there's all the
+cuda hell
+of you know things like out of memory um
+site assert errors all this garbage
+and um there the the great tip from
+sylvan is to put the model on the cpu
+because then you'll actually get a trace
+back in python that tells you where the
+you know which line of code the error is
+actually coming from
+so i would say those are kind of the
+main things so check the data
+put it on cpu
+and then you know have fun
+another question that's linked to to the
+technical difficulties uh
+so during the technical glitch lewis
+explains the weights it loss can you
+show it again so could you share your
+screen and show it again because
+apparently there are something that
+people missed yeah sure let's do that
+thanks a lot
+okay so let's see you should be able to
+see
+this weighted loss trainer where is it
+up here
+yeah
+um yeah so let me just like very quickly
+say what i was trying to do here so um
+basically in in the trainer you can
+override various methods and the thing
+that we wanted to do was to find a way
+to kind of weight the loss according to
+the distribution of classes in the data
+so i had actually previously computed
+the class weights
+and what you can do then is just extract
+the outputs from the model
+to get the logits get the labels from
+the data and then just compute the loss
+using the standard cross-entropy loss
+and then basically this function will
+just return the loss and the model
+outputs um if that's needed or just the
+loss by itself
+and yeah this shows you kind of how
+simple it is to kind of customize the
+trainer to do the things that you you
+really want it to do
+if you've got like a sort of task or
+application that isn't supported out of
+the box
+does that answer the question silvan
+i think so
+so we had some other questions coming on
+the forums while you were talking
+uh
+is there a page in the docs a chapter in
+the course an external resource with an
+overview of different loss functions and
+their advantages disadvantages
+that's a great question as far as i know
+we don't have something like that in the
+transformers docs um but that would
+actually be a great community
+contribution so
+if the person who asked that knows knows
+the answer or wants to learn um it would
+be really nice to have like a table in
+the docs which explains like which loss
+function is kind of optimal for um which
+task
+i would say that in general like for
+most applications
+uh fiddling with the loss function is
+kind of the the latter thing that you
+want to focus on it's much more
+effective to
+switch the architecture for example or
+just
+improve the data set if you're really
+trying to squeeze performance out of out
+of the task
+but um yeah that was a really nice
+community contribution
+and uh one last question is
+does the way the initialized model was
+made as in made using tensorflow by
+torch affects its performance or cause
+any issue
+yeah that's a really uh deep question um
+because we actually know that like the
+way that we initialize neural networks
+has a long history of
+people finding like different ways to
+initialize it and get suddenly state of
+the art
+i would say that in the case of
+transformers because we're kind of
+building a head
+that is randomly initialized on top of a
+pre-trained body
+most of the time this isn't a concern
+you you can
+just train it and you'll get some kind
+of fluctuation with each training run
+but generally speaking you'll see pretty
+stable results
+the only time i've seen this actually be
+a problem is if you have a lot of
+classes so imagine i have like a
+thousand classes or something like this
+and suddenly in you know some of the
+rare examples my model has only got like
+three examples to to um to see in
+training and then you'll start to see
+much greater fluctuation at the per
+class level
+and then what you can do is do multiple
+training runs
+and then kind of average the results to
+get kind of a confidence uh window um
+over that
+but yeah generally speaking you're good
+to go and if you want to fix it you can
+also set the seed in the trainer
+thanks a lot that's all the questions uh
+people had
+and
+yeah
+and i think it's time for our next
+speaker
+do you want to introduce him uh lewis
+sure so our next speaker is the famous
+sanjay debut
+um
+what hey am i jumping ahead yeah you
+think you jumped a little bit too much
+ah sorry sorry okay so
+our next speaker is my nemesis
+[Laughter]
+so
+so matt um
+you may have seen recently he just
+tweeted like an hour ago that everyone
+comes to him complaining about
+tensorflow bugs and i'm one of those
+people and so
+today um matt's gonna tell us like how
+amazing tensorflow and keras is but what
+he actually does at huggingface is also
+maintains the tensorflow side of the
+transformers library
+and um
+he's a great speaker and has a lot of
+great humor so i'm looking forward to
+plenty of jokes
+uh no promises
+all right so let me get this stream
+yeah we'll disappear from the stream
+and okay so this fingers crossed
+g'day this is lewis
+hi so this is going to be a quick talk
+about uh new features we've added to the
+hugging face libraries uh for uh
+particularly for tensorflow and keras
+users
+um so there's one particularly important
+feature i want to show today um which
+saves me a huge amount of repetitive
+boilerplate code and it also improves
+the memory usage and performance of my
+training by a very large factor
+so to start i'm just going to set up a
+standard sort of training run
+and then we'll see how we can use this
+method
+to save us a lot of effort and to
+improve our performance significantly so
+we're just going to start
+we're going to start by loading a data
+set so we need the load dataset function
+from the datasets library
+and the dataset i'm going to use
+is the
+cola dataset from the blue benchmark
+oh sorry load dataset
+okay so if you look at this dataset
+it's very straightforward there's only
+three columns
+um the sentence the text the input for
+each sample the label
+which is just a zero or one so this is
+just a simple binary classification task
+the model is predicting uh whether a
+sentence is valid english or not
+and then the third column is just the
+unique index for each sample so this is
+pretty much as straightforward as nlp
+tasks get
+but even here this method is going to be
+really useful
+so what do we do when we have our data
+first thing we do in almost all nlp
+tasks is we tokenize it so we're going
+to import our tokenizer
+and
+today feels like a distilbert kind of
+day so we'll use our model as distilbert
+so tokenizer equals auto tokenizer
+okay so that should give us the
+distillery tokenizer
+and now
+um there's a cool trick for applying
+these things to their for tokenizing
+data sets
+and that is
+to use the dataset.map method and i'll
+show you here if we just make a quick
+tokenization function
+and
+all the tokenization function does
+is it just tokenizes the sentence key of
+whatever dataset you pass it because
+sent the sentence
+key is the key that contains all the
+input text for each of these samples
+then all we need to do to tokenize all
+of our data sets
+is
+to use the dataset.map method
+and map that function
+sorry tokenizer
+and here we go and now
+we should have our data sets
+so a cool thing here is that when you
+use map
+um
+if you if your function returns a
+dictionary
+all of the keys of that dictionary are
+going to be added to the data set as
+columns so the tokenizer returns a
+dictionary with input ids and with
+attention mask keys
+and both of those are now
+um in the data set as columns and that
+means that all of our data is sort of
+kept together
+um for we can pick out any single sample
+and see both its original text and its
+input ids and its attention mask and so
+on
+um so it's it's really handy for
+you know kind of organizing your data
+this way um but that's not that that
+feature has been around for a while
+there's something new i want to show you
+and that is the 2tf dataset method
+so
+why do we need this method so
+let's see why let's look at the
+input ids so i'm just going to
+pick out the training data set
+i'm going to pick at the input ids here
+i'll just put that in a variable called
+tokens so the input ids are the tokens
+that come out of the tokenizing and if
+you look at tokens we see it's just a
+list of lists so each sample has been
+turned into a list of integers
+like this
+and now if we just check the lengths so
+i'm just going to say
+len sample for sample in token so that's
+going to give us the length of every
+single sample
+we see here the lengths and they vary so
+there's
+um
+quite a range of lengths they're mostly
+around the same length because they're
+all like one sentence
+um but even one sentence can have a
+varying number of words and each of
+those words can be split into a varying
+number of tokens so there's quite a lot
+of variability in terms of how many
+tokens there are
+in fact if we look at the max
+we'll see that one sentence has ended up
+as 47 tokens
+and if we look at the mean
+we'll get that from the statistics
+library
+we could have also also just divide some
+by length that would work as well
+we see the mean is 11.5 so if the max is
+47 tokens but the mean is 11.5
+um
+the longest sample in that data set is
+almost four times in fact slightly more
+than four times as long as the average
+um
+and that's a problem because
+if we want to turn this data set into
+one single tensor or one single array
+we're going to need to pad every sample
+to the same length
+uh and particularly
+when i want to train with keras
+it's really really helpful if i can get
+the data in one single array that's
+something i really want to do because
+then i can just pass it to keras and
+keras will handle
+you know it will sample from the data it
+will shuffle the data it will make
+batches for me i don't have to worry
+about any of that
+um
+but it's pretty much it's pretty
+difficult to do that here
+um because if we have to pad all the
+samples to the length 47
+on pretty much three quarters of our
+data is going to be padding tokens when
+we're done
+and that means our data set is going to
+be four times bigger than it needs to be
+which is going to be a big waste of
+memory
+and it's also going to slow down
+computation enormously
+um
+in the case of the cola data set i mean
+these are not huge samples even 47
+tokens is not that big language models
+can handle inputs from 128 to 512 tokens
+very easily and there's more specialized
+models can go way beyond that
+um
+but these
+uh even though we might you know we
+could sort of get away with padding
+everything to the maximum length for
+cola
+um
+it's
+still a big waste and for other data
+sets it's an enormous waste and a waste
+that would probably make the task
+impossible if you had to do it
+so in general padding every sample to
+the maximum length is not something we
+want to be doing regularly but if we
+don't do that then we can't put all the
+data in a single array and that means we
+can't pass it easily to model.fit we end
+and what i personally ended up doing was
+writing generator functions a lot of the
+time and that generator would have to
+handle
+shuffling and sampling and batching all
+the data for me and it just meant i was
+writing the same code over and over and
+over for every task i wanted to do i
+would have to write this huge generator
+and it was a big source of like you know
+small bugs would often be in the
+generator and it would be i'm just a big
+annoyance to debug them
+um
+so what i want is some way that i can
+pass the data to tensorflow and without
+having to write all that boilerplate
+code um but with also without padding
+every sample to the maximum length of
+the data set i only want to pad each
+batch the minimum amount required to
+make that one single batch a tensor
+um
+so the solution we came up with is the
+2tf dataset method and i'll show you how
+that works here
+but the first thing we're going to need
+before we use it is a collation function
+so a data collater
+is a function that puts together samples
+into a batch so you can write your own
+but we've got
+a range that covers pretty much all of
+the common
+collation methods you would need to use
+so probably the single most common
+is the data collater with padding and
+that's exactly what we need here we need
+the data collater with padding data
+collater
+and then we created likes and we
+initialize it like so we say
+data collater with padding
+it needs the tokenizer and the reason it
+needs the tokenizer is that different
+models have different padding styles
+and so it needs your model's tokenizer
+so it knows how to ha pad data in the
+way that your model expects and the
+second thing it needs is it needs to
+know that you want tensorflow tenses
+back and because these data collaterals
+and our tokenizers are all framework
+agnostic which means they're designed to
+work with both pi torch and tensorflow
+and even with jacks
+um
+so you need to be very careful that you
+tell it and the the type of tensor you
+want back so you don't accidentally get
+pie torch sensors or some other horrible
+undesirable thing in your lovely
+tensorflow code
+um so if we run that we now have our
+data collater
+and now we can convert the data set like
+so we just say we'll start with just the
+training data set so we'll just say uh
+tokenized data sets train and then we
+call the two tf data set method
+and what it needs to know is it needs to
+know
+the columns
+which is going to be which columns of
+the data set are we going to be passing
+to our model
+um
+so we can see here that those are almost
+always the columns that were added by
+the tokenizer um
+so we can just
+put that in there
+so those are the columns we want to go
+as our input and we can also add label
+columns so these are the um the columns
+that are going to be passed um as the
+label in each batch
+and that is
+labels it's also um you'll see it's
+marked as label but our data collaters
+rename the column label to labels
+because almost all models expect the
+input to actually be called labels
+uh just a minor quirk that will be the
+the data collider will take care of it
+for you so don't worry about that too
+much but just be aware of that as an
+interesting quirk of most transformer
+models um
+and then the other things we need are we
+just need to tell it that we want the
+data to be shuffled and we want a batch
+size of 16. so these are arguments that
+you would normally pass to fit um but
+when you're generating your data outside
+of it for example with a data generator
+these are the things you need to take
+care of yourself
+and
+the the tf dataset method needs to know
+whether you're shuffling and what batch
+size to be to output for you
+um but i've tried as much as possible to
+keep these methods close to the same
+keras arguments so you just move these
+arguments from fit
+to to tf data set and it should work in
+the same way
+and then the final argument we need is
+the collate function
+um so the argument is collate function
+collate fn and we just pass it the data
+collateral we initialized already and of
+course i just realized
+we actually need to save that as a
+variable and not just run it on its own
+so we run that this is this is just
+tensorflow initialization don't worry
+about it
+um
+and if we look at our data set we see we
+get this nice data set out so
+it's
+each batch this is showing you sort of
+the shape of each batch that's going to
+come out of the data set so you can see
+that each batch is an input dictionary
+the keys are attention mask and input
+ids
+and it also gives you the shapes of the
+types
+for those and then the second element of
+the tuple is a label here
+um
+and it has it's just uh seeing a
+one-dimensional vector with shape 16.
+um so that's exactly what we want
+and the great thing is this data set is
+just ready to go so now all we need to
+do is uh compile and fit our model um so
+uh
+one uh we'll just get our optimizer so
+it's from tensorflow to keras.optimizers
+adam
+um
+and the reason we are doing it this way
+and not just calling adam by string is
+of course that we need
+significantly lower learning rates for
+adam
+than the default adam by default has a
+learning rate of one e minus three but
+with transformers something like five e
+minus five is usually much more
+appropriate and so that's almost 20
+times lower in fact exactly 20 times
+lower
+and the second thing we'll need
+is to import our loss
+and our loss of course is sparse
+categorical cross-entropy because we're
+doing a classification task
+um and again
+this is something you can call by string
+and in when you're calling model.compile
+you can just pass these as strings um
+but it's not advisable to do that with
+the express categorical cross-entropy
+laws and the reason for that is that all
+hugging face models output logits
+um
+not probabilities so logits are the
+values before you apply a soft max to
+them
+so a softmax turns raw logits into your
+output probabilities
+um
+and so you you should be aware that um
+the d the sparse categorical cross
+entropy loss in keras expects
+probabilities by default and if you want
+to pass it logits you need to make sure
+to tell it that that's what indeed what
+you're passing it
+so that means you need to import the
+loss and then set that argument
+correctly but now we have both of those
+we can import our model
+and we can so
+so this is going to be a four sequence
+classification model because this is a
+sequence classification task
+and our model is going to be
+i'm just going to initialize it with a
+standard from pre-trained method
+and we're using um
+we're going to make sure that of course
+we use the same
+model here that we tokenized our data
+with up here
+um
+so at this point everything's been
+initialized it's just telling us that
+some some layers were newly initialized
+because it added a classifier layer
+and that we're going to need to train
+this model before it can actually
+classify anything and that's of course
+exactly what we expect so now we can
+simply compile the model we have our
+loss we have our optimizer
+so that all works
+and now
+the beauty is we can just pass this
+straight our train data set that we made
+with the 2tf dataset method
+we can pass it straight to model.fit
+give it a second to compile and put
+everything together
+and there's our model
+so
+this is a very quick script there's a
+very quick script there's very little um
+i'm going to set a very quick crypt
+there by accident and i don't think
+we're burying anything um
+but
+the uh the key thing to take away is
+just that there's
+very little code here but this um setup
+will give you
+um minimal memory usage and maximum
+performance because the data is only
+being padded just in time so each batch
+is coming out and it's being padded at
+the very last moment and only to
+the minimum size needed for that batch
+and that means that we're not wasting
+any padding tokens
+and whereas if we padded the whole data
+set uh
+you know we would have a huge amount of
+padding tokens and everything would just
+be much slower and we'd be bloating our
+memory usage massively
+um
+and without the 2tf dataset method we
+would need to write a generator and
+collateral ourselves
+to do all of this and it would be a huge
+amount of boilerplate code that would be
+a source of bugs and just a big waste of
+time
+um
+so with this method which i recommend
+using in essentially
+um every
+keras training setup you're doing
+whenever you're using transformers
+models and
+hugging face data sets
+and you just call this one method and
+you get a data set that's just ready to
+go straight in model.fit and so you get
+clean results
+top performance and a minimal of
+wasted effort and boilerplate code
+so that's the method i wanted to show
+you today and i hope you find it useful
+so thank you very much
+hey everyone
+so thank you very much for that talk
+matt that was super nice
+um yeah that was very insane fault
+thanks
+we also appreciate the little dig at pie
+torch
+it's important to be clear where my
+loyalties lie
+cool so we have a couple of questions um
+so let's see
+the it is a kind of great question i
+think about the um the way data
+collaterals work so i'm just going to
+put up on the screen so
+the question is does it make sense to
+sort the data by length so we get less
+padding per patch
+so that's that's a clever idea that
+would actually work you you would then
+get these batches that would only be
+padded a small amount the problem then
+is you're not sampling your data
+randomly so every all data would end up
+being batched together with the same
+other samples
+so you would not get a random shuffle of
+your data set if you did that and that
+meant that would mean especially if
+you're training for multiple epochs and
+your training would start to have very
+weird properties um because of that lack
+of random sampling so i i don't think it
+would work in practice you might get
+away with it with one epoch of training
+maybe
+but even then i'm not sure i recommend
+it
+great
+so then we have another um
+question which is about zero shot
+models so if you have something like a
+zero shot model how does the tensorflow
+auto model for sequence classification
+change
+okay that's a really good question um
+so in the example i used here i started
+with distilbert and distilbert is a
+language model not a sequence
+classification model and so when you put
+distilbert in tf auto model for sequence
+classification it basically sticks a
+classifier head on the on the like very
+last layer of distilbert and just
+randomly initializes those weights
+so that will not be capable of zero shot
+classification
+so if you want to do zero shot
+classification you need to start with a
+checkpoint and that was trained on some
+sequence classification task in the past
+so that it will have the sequence
+classification head
+and then you do zero shot classification
+by just applying that model uh directly
+to your data without training and the
+hope is that if it was trained on data
+in the past that is relatively similar
+to your data then you will get and zero
+shot classification out of it
+um but that you will never get zero shot
+classification from
+a base language model like distilbert
+base
+just because it has never done sequence
+classification before
+so it always has to be trained with some
+label data
+awesome
+yeah i think what you can also do is use
+like natural language inference as the
+task which is kind of like an elaborate
+classification task
+if i remember correctly that's actually
+how the zeroshot pipeline is based on
+so you could do that in tensorflow
+pretty easily oh yeah yeah if you can
+reframe the question as a natural
+language question then get completion
+out of that that would also work
+okay so we have another question which
+is maybe coming also back from my talk
+um so
+imagine i have like an imbalanced data
+set um do i need to worry about
+preserving the imbalance like the class
+distribution per batch or is this not a
+problem
+it's a good question uh
+so i would
+i don't think it's necessary to
+perfectly balance pert batch uh lewis i
+don't like would you agree or disagree
+with that i think is i agree i might
+over sample over the whole data set i
+might over sample the rarer classes
+um i don't think i would care that much
+about balancing every single batch
+exactly and each batch is only maybe 16
+to 30 examples on a single gpu right so
+i think this problem is going to kind of
+wash out in the
+average
+remember that we trained plenty of
+classification model in imagenet which
+has like 1 000 labels and it's the batch
+size is not 1 000 so like
+but it is definitely it can be very
+helpful to oversample the rare classes
+even if you don't put them in every
+single batch to still sample them more
+often than they would randomly appear
+that is definitely a method people use
+and that works well
+cool and maybe i can ask you a question
+no no it's going to be fine so
+i think one of the really exciting
+features um in the tensorflow api that
+you've been uh developing has been this
+kind of conversion of data sets into
+tensorflow data sets
+um at least myself this was always a
+pain point in like bridging the gap from
+you know the hugging face ecosystem to
+the keras one and so i was just kind of
+curious like what's on the say roadmap
+for tensorflow um in transformers
+oh god there's a lot of things there's a
+there's a huge notion document of things
+you want to add um
+so okay and things that are big on the
+roadmap is we want to get a lot of
+vision transformers working well in
+tensorflow so those have been we've
+added some recently and we're planning
+to add several more there's been some
+great contributions and from people in
+the community
+um
+so transformers are not just natural
+language processing objects that's kind
+of where these have started and they see
+the most use
+but they're getting extremely good
+results um for vision tasks as well
+um
+and so
+we want to make a push because i like a
+lot of vision people and people are
+working computer vision use tensorflow
+and keras um we want to like
+make um make the ecosystem kind of
+available for them as well
+um
+other than that
+we've got there's like
+there's a huge list of fixes
+particularly involving um
+kind of like big performance boosts for
+example uh generating text with
+tensorflow language models and we're
+going to make that a compilable
+tensorflow function which is going to
+give it a huge performance boost and
+hopefully even beat pytorch which is
+kind of my secret internal goal whenever
+i start doing these things
+um i want that to i want that to end up
+faster um being like xla compilable and
+it's going to really upset everyone else
+at the company
+whenever another question are coming
+from the forum
+i understand that padding enables
+patching data points together but too
+many padding tokens make the competition
+very slow what is the attention mask for
+i haven't fully understood the purpose
+of padding and attention masks and the
+impact on speed
+okay so that's a really good question so
+the reason for padding is that if
+samples are different lengths if you
+want to put them in an array the array
+um like the array is going to be square
+or rectangular basically it's going to
+expect that every sample is the same
+length
+so when we pad we basically put these
+null padding tokens onto the end of
+every sample
+and those are just there to basically
+bring them up to the same length but we
+don't really want them to affect the
+computation at all and that's what the
+attention mask is for so the attention
+mask is one and it's the the attention
+mask is the same shape as the input
+array and it contains ones for real
+tokens and zeros for padding tokens and
+it basically tells the model to ignore
+all the tokens with a zero in the
+attention mask
+um
+so
+you uh you can like i said pad the whole
+data set but then you end up with your
+attention mask mostly being zeros at
+most of your samples just being padding
+tokens you know stretching off into the
+distance and that's just very slow and
+very inefficient because padding tokens
+do still waste a bit of memory into
+computation time even though we try and
+get the model to ignore them
+so it's ideal to use as few of them as
+possible and that's what this method is
+all about
+awesome
+do we have any more questions
+i think we did we asked someone about
+the maximum length
+yes i think okay so we have no more
+questions
+great thank you perfect thanks once
+again matt and i'll hand over to
+everyone to introduce the next speaker
+uh so yes
+let me remove matt
+and add our next leader
+hi
+um
+so
+just to introduce him
+lissand is machine learning engineer
+talking phase where he's involved in
+many open source projects and his aim is
+to make machine learning accessible to
+everyone by developing powerful tools
+with a very simple api
+and today is going to talk to us about
+the urging face app as a means to
+collaborate on and share on machine
+learning projects
+need me
+great just adding the video to the
+stream
+hey everybody welcome to this talk about
+the hugging phase hub
+i'm lysander i'm part of the open source
+team at hugging face and i'm super happy
+to be here to present to you all
+everything we've built over the last few
+years
+so we'll get straight to the point and
+we'll start with the three main aspects
+of the hugging phase hub
+so these are models data sets and spaces
+we'll take a look at the first two in
+detail and have a small introduction of
+the third one because mervy is going to
+present the third one the spaces in her
+standalone talk
+so let's first take a look at the model
+hub the model hub hosts a wide variety
+of different models it acts as a
+platform for hosting and sharing models
+and actually we just passed the 20 000
+public models milestone this weekend
+which is pretty exciting
+and these models these 20 000 public
+models are trained on a lot of different
+tasks
+so we have a lot of filtering options on
+the left if we go take a look at the
+tasks category there is a split for the
+domains the fields
+the natural language processing models
+come first with many different tasks
+available and in other fields there are
+the audio and computer vision domains
+with here too quite a lot of different
+tasks
+the models available here are not
+necessarily from the transformers
+library the model hub is agnostic to the
+library
+so while there are a lot of transformer
+models there are also models from other
+libraries such as flair
+tim speech brain scikit-learn and many
+others
+any model can be uploaded so even models
+that are in pure pi torch or pure
+tensorflow or any other frameworks can
+be uploaded here and offered to the
+community
+other filtering options include data
+sets to filter out models trained on
+specific data sets
+languages which is particularly
+important for nlp tasks while there are
+a lot of english based models where very
+proud to also host thousands of models
+in other languages
+it's also possible to filter out by
+license so that you make sure to only
+see the models which will fit to what
+you're working on
+and finally the last filter helps filter
+out models compatible with some of the
+training or inference tools we have at
+hugging face such as auto nlp
+or infinity
+so let's check out what a model looks
+like on the front end on the web
+interface
+when clicking on a model you're
+redirected to the model card of the
+model
+on the right you'll see the api widget
+with which you can play to get a feel of
+the model
+on the left you'll see the model card i
+just mentioned
+which can be seen as the documentation
+of the model
+this should contain the model's
+description alongside any elements that
+would help understanding what the model
+was trained for and how it should be
+used
+this should contain code samples for
+usability
+mentions of the data sets on which the
+model was trained the hyper parameter
+during training used and it should
+highlight areas where the model should
+perform well as well as areas where it
+wouldn't perform as well
+we strongly recommend mentioning the
+potential issues with the model for
+example regarding potential biases and
+limitations
+all right so now that we've taken a look
+at the model hub and before we
+understand how to contribute a model to
+the model hub we're going to take a look
+at the data sets hub
+similarly to the model hub on the left
+we'll see a few categories to filter out
+data sets
+there's the very general task categories
+first which you can complete using the
+most specific tasks filtering option
+you'll then get a few other filtering
+options like languages sizes and
+licenses
+when clicking on a data set you'll be
+facing this super cool page with a lot
+of information about the data set
+the first thing we'll see on the page is
+the brand new data set preview which
+allows you to navigate the data set and
+get a feel for the format and content of
+that data set this works with text but
+also with images for example here with
+mnist
+you can take a look at the different
+splits for example the training and
+testing split here
+and coming back to the glue dataset page
+you'll see some additional information
+which may be useful similarly to the
+model card there is the data set card
+which is as important and really goes a
+long way to explain what is the data set
+made of and how it should be used
+additionally on the right you'll find
+all the models which were trained on
+this data set
+cool so now that we've taken a look at
+both the model hub and the data set hub
+the final third big component of the
+hugging face hub are the spaces spaces
+are a super good way to demo your
+machine learning projects they're
+customizable and deserve a talk on their
+own which is great as motave will deep
+will dive deep in spaces with you in a
+bit
+okay now that we understand about the
+three core components let's understand
+how we can work with them and
+collaborate using them
+so what's really cool with the hub is
+that all of those are basically get
+repositories models data sets and spaces
+are all get repositories which you can
+clone to your machine
+and there are several ways to work on
+them the first one is through the
+hugging face website which is very
+straightforward but is a bit limiting
+the second one is through the open
+source libraries themselves for example
+if working with transformers or data
+sets you'll see some loading and saving
+utilities which will work directly with
+the hub i won't dive into them here as
+lewis will do so in his upcoming talk
+here we'll study the third way which is
+using the hugging phase hub python
+library
+this is what is used under the hood and
+by all third party libraries and it
+provides a super simple api which sits
+right on top of git and get lfs to
+provide custom utility methods so it's
+exactly like using git in your command
+line except it's made for model and data
+set and spaces
+repositories with a few useful utility
+functions so let's start with a simple
+use case we have this model which is a
+really cool model from the transformers
+library it can perform some super fancy
+text generation in the computational
+linguistics style
+let me show you the model first
+i start by looking at the files which
+are in the model
+here i see that i have both the
+tokenizer and model files files inside
+the folder
+i load the tokenizer and i load the
+model to have them in memory directly
+now that i'm ready the first thing i
+want to do is to create a model
+repository on the hugging face hub
+i do so using the create repo function
+from the hugging face hub python library
+i call it with the mycool archive model
+parameter
+which means that i'll be creating that
+repository under my namespace which is
+lysander
+i can check that it was correctly
+created by checking out the web
+interface navigating to my profile page
+and boom the model is indeed here if i
+check the content however i see that it
+is empty which is normal since we just
+created it
+now that the model repository is created
+i want something to handle it
+for that i used the repository object
+i instantiate it with two parameters
+the first one
+local folder is the folder i'll be using
+locally to store the clone of the
+repository
+the second parameter is the id of the
+repository which i'm cloning
+nice
+now that the repository is cloned i
+should have a local folder containing
+the remote files
+if i list the content i see that i only
+have the get files but nothing else
+that's normal since we just created the
+repository as we have just seen on the
+web interface
+we'll now save the model n tokenizer in
+the local folder to have the files
+directly inside it we could also have
+just moved the files in it from the
+previous folder that we had but it
+wouldn't have made for such a cool demo
+right so if we list the files in the
+folder again great we have all the files
+that we have just saved we're ready for
+the push
+we now follow the usual git workflow we
+first stage the files using the get add
+method we input a special parameter
+which is the auto lfs track parameter
+this does some lfs magic under the hood
+where it will automatically track large
+files that would be otherwise rejected
+it's not always necessary but it doesn't
+hurt to run it
+we then commit the files and we push
+those files
+since i sped up that part 20 times it
+ended up being super fast which is
+fantastic
+nice we have successfully committed our
+model
+if we go back over to the web interface
+we can see that there is now an
+inference api widget so we can try it
+out directly on the website and make
+sure that the model works exactly as we
+expect it to
+nice we have successfully committed our
+model
+we'll take a quick look at doing the
+same with a data set which isn't very
+different
+so i have my data set saved on disk i'll
+import it using the load from disk
+method
+i load my super cool data set in memory
+and i use the two same methods i used
+before
+here i add another argument which is the
+repo type argument i'm essentially
+telling the methods that they're
+handling a different report type they're
+handling a data set rather than a model
+now that the repository is created i can
+take a look at it in the web interface
+it's empty once again but we're going to
+fill it really soon
+we save the data set using the 2par k
+method to save it as a parquet file
+using the traditional git add commit and
+push and we're good to go
+okay that's it for the model and dataset
+hub and how to use them
+we'll explore further ways to handle
+your models data sets and spaces and the
+other talks by my team members and in
+the course of course
+thank you for listening to the talk and
+i'm really looking forward to seeing all
+of your cool projects you're going to do
+during this week and i really look
+forward to working with you all
+great thanks for talk alessandra super
+nice
+um thank you most enthusiasm i've ever
+seen about the mnist dataset so yeah i'm
+very very enthusiastic about like model
+cars dataset cards
+even the model here with computational
+linguistics made me excited so you know
+cool so a couple of questions that come
+to mind is um when we're using the hub
+to to share say models for example some
+of these models that we have now are
+getting quite large is there kind of a
+limit to what i can push to the hub can
+it be
+ppt3
+oh that's that's a good question so uh
+yeah as you said the model sizes have
+been uh getting bigger and bigger and uh
+in the past
+uh we've had a few issues with managing
+such big models uh but actually like the
+infrastructure is getting more robust to
+do so like a good example of a huge it's
+not a model but it's a it's a data set
+which i believe is the uh multilingual
+version of c4 which weighs 19 terabytes
+it actually lives on the hub right now
+um
+and there is no uh and actually the um
+big science effort
+uh
+which is this big effort with uh more
+than 500 scientists working on the
+creating a very big artifact uses the
+hub
+as a means to store uh intermediary
+weights so these weights can end up
+being very very large
+um
+and the hub
+is a is a cool place to to use it's not
+necessarily the best place according to
+what you're trying to do but for
+most use cases it's definitely a place
+to be considered to store very large
+weights
+awesome great
+and another question that um i've often
+wondered is like
+you know the hugging face hub um is one
+of several hubs that exist in this space
+so we have the tensorflow hub there's
+also a pi torch hub
+and i i know there's also some other
+data set hubs but just wondering like
+what do you think i like kind of sort of
+differences like sort of philosophically
+between these different hubs
+that's a good question um so i think
+there's a
+there are quite big differences in
+between each of those hubs
+um with the uh with the model and the
+data set up what we're really trying to
+achieve
+is uh we're trying to have this uh
+agnostic platform where people can share
+their models
+uh agnostically to the library so it may
+be in python maybe in tensorflow it may
+be in jax or even many other libraries
+like like seen in the videos we have
+support for at an nlp we have support
+for space you have support for many
+others i believe there were some efforts
+in julia also recently so we're just
+being very open uh to any contributions
+that might be helpful to the community
+as long as it's open it's fine
+um
+and then like if you compare it to the
+uh to the pie torch hobbit so it's a bit
+different as
+the pirate watch hub shares uh
+something a bit different with the
+weights but also code to run directly
+the uh inside
+the python runtime whereas we mostly
+share just weights
+uh so then it's up to you to get your
+code running
+as you want inspect it as you want
+whereas with the power touch hub it's uh
+it's just you know slightly different
+and not as a raw i'd say uh it's still
+super super cool and uh and has a lot of
+uh
+uh it's very
+useful i would say but it just serves a
+different purpose than our hub serves
+and i think the two are very
+complementary
+yeah exactly
+and i think it's that's the key thing
+that like it's not necessarily a
+question of either or it kind of really
+depends on on your use case and also
+maybe if you're for example using the
+tensorflow hub you get some extra
+features like tensorflow extended and
+you know this you know if you if that's
+what you're working in it makes sense to
+use the best tools for that
+yeah absolutely and like for the for the
+hugging face hub what we're really
+reaching for
+is uh is for this central platform where
+everybody can feel free to share
+uh their models as much as they want
+they can just store as many checkpoints
+they want
+for example we
+with the recent trainer changes we
+really encourage people to push their uh
+intermediary checkpoints to the hub as a
+standalone commits so for example if you
+do a full training run using the trainer
+you have the option to not only push the
+final model for use but you can also
+push every intermediary checkpoints and
+where this
+becomes really really cool is that as we
+can as we have just seen in the video
+when i play with the model at the end of
+pushing it you can also actually just do
+that during training so if you're
+training a model you can just add
+different points of the training like
+every thousand epochs or every 100
+epochs or every 10x you choose you can
+just check and see if the
+generations are better with the uh
+according to the task you're doing of
+course but you can just check if the
+performance of your model is getting
+better with like very uh intuitively
+awesome awesome
+yeah and maybe another question that
+i've heard a lot from people in the
+community is like you know suppose i'm
+working in like a framework that maybe
+isn't supported yet so i know that right
+now we have transformers and we've also
+got spacey and ln lp but like you know
+maybe i'm like a researcher who has like
+a kind of let's say maybe more niche
+library
+is it still possible for me to share my
+models on the hub
+absolutely that's a great question
+so the way we do things is that we
+encourage people to have upstream and
+downstream supports in their library
+which means the ability to just use
+models from the hub in their library or
+to push modules to github
+but if you're having a very niche
+library which doesn't necessarily have a
+lot of users or doesn't necessarily have
+all these uh serialization mechanisms
+maybe you're not too interested in that
+and you just want something that works
+for yourself and so with the hugging
+phase hub python library we offer this
+kind of
+front-end to the hub
+which isn't this web ui but it's a
+python library which you can use for uh
+like to download models who cache them
+in your to cache them locally to prevent
+likely downloading a lot of
+identical files uh and also some
+upstream um management tools to manage
+your repositories on the hub to manage
+your files that are getting uploaded so
+either either of these two options
+should work
+according to what you're really trying
+to achieve if it's making it easier for
+your users or if it's just for yourself
+to upload models to your repository
+awesome so we've also got just had a
+question that's come in um from the
+thread so
+this is a really important question
+which is you know some data sets have
+some licensing issues or maybe they're
+just copyright material is it okay to
+still share these on the hub
+right so that's that's a good question
+usually it's it's best to think of those
+as a case basis according to the license
+um so when datasets are shared with a
+very permissive license
+then they can of course be shared it's
+important to always
+keep a link to the license of the data
+set under which it was shared so there
+are some utilities on the hub to
+actively
+show which license is the data set under
+for some more complex
+licenses for example some data sets
+require
+specific licenses where you would have
+to share your name your email to have
+access to the data set
+and here it's a bit different
+where when sharing the data set you
+should try as
+well you should
+as much as possible try to respect the
+license uh as otherwise it's just not
+legally shareable
+cool and
+maybe maybe a more personal question so
+you know right now we have um
+quite a few different uh positions
+available in the open source team um and
+maybe it'd be cool to sort of tell
+people a little bit about what is it
+like being like a day in the life in the
+open source team at hugging face and you
+know maybe for yourself you lead the
+team so what does that also involve
+yeah thank you for thank you for asking
+i think that's uh that's an interesting
+question that we get a lot um
+[Music]
+something i like to say is that even
+though we
+were very very open with uh like hiring
+a lot of people we're really looking for
+uh generally the same skills that any
+machine learning engineer would have
+um so basically uh yeah when you think
+of an engineering engineer or data
+engineer it's basically the same skills
+but the job is actually very different
+because when working at hugging face
+you're not going well you can but most
+of the time you're not going to spend
+time working on a
+model or a data set and trying to have
+the best performance trying to have the
+best security try to do your own
+training pipeline what you're actually
+going to do is instead
+work on providing the tools to do that
+better so you need to have the skills
+because you need to understand
+all of that
+um activity all of that work uh but that
+in the end at the end of the day what
+you're really going to build is a tool
+to make it easier for people like you uh
+to just do that
+and so this uh this also comes with a a
+few uh skills which maybe are not too
+traditional for a machine learning
+engineer
+engineers this comes with communication
+style skills sorry because you need to
+manage this open source community you
+need to be
+very open to uh disagreements because uh
+of course there's always going to be
+some open source repositories um and you
+need to just basically uh
+be very open for collaboration uh at
+hugging face we really strive for
+collaboration as our main
+ethics where we think the more people we
+have collaborating on project
+the better and the more inclusive the
+resulting projects may be
+so right now we've
+just passed the thousand contributors on
+the transformers library which is super
+exciting super exciting milestone and uh
+i think we're really going to strive for
+uh making it as accessible as possible
+to for people to contribute
+uh to the library not only use i use
+awesome thanks a lot for all that
+information and i was just going to
+maybe a follow-up thing would be like
+you know if i'm interested in one of the
+roles in the open source team
+um probably the thing that like really
+helps if you want to sort of stand out
+from the pack is to have some open
+source experience yourself and
+a great way to start is actually just to
+start looking at the issues on say the
+hugging phase libraries you can check
+out the data sets transformers i can
+face hub library and this is often a
+great way of kind of developing a kind
+of
+an unusual relationship with the
+maintainers um i find this was i think
+in my case personally my very first
+contribution was to the datasets library
+and this was where i interacted with
+consuan and some others and i don't know
+it's a nice way of getting a feeling of
+like what it would be like also to maybe
+work here and so my suggestion would be
+if you have the time
+um to take a look at that
+yeah exactly and it's also a bit
+peculiar i don't think everybody likes
+the community aspect of it
+to interact with community contributors
+to review pr's to look at issues to
+solve tickets
+i don't think that's something for
+everybody so it's a very very good way
+to just check and see if open source is
+something that is is interesting to you
+definitely
+cool so then one last question which is
+uh similar to mats
+um
+also you're heavily involved in the
+transformers library
+what is on the horizon we've now got
+vision we've got audio and nlp
+what's next
+and that's a that's a great question
+we're really going to push forward with
+the
+multi-shield aspect of the transformers
+library so up to now we've been mostly
+focusing on nlp but as you've said now
+we're also
+quite active in the speech and vision
+fields we're going to push those aspects
+further
+we're actively working on improving our
+speech
+models right now with some language
+models capabilities
+same for vision where we're really going
+to have
+we're really striving for
+transformers to be
+a very very useful
+tool in the entire computer vision stack
+on top of that there are also other cool
+things that are coming up
+for example silva has been working on a
+super cool aspect of the hub integration
+where right now you can just push
+modules and tokenizers to the hub what
+silva has been working on is this is the
+ability to push
+model code tokenizer code directly to
+the hub
+and so for example if you have your
+standard bird model uh it's uh
+and uh let's say you're just changing a
+tiny thing in the way the attention is
+computed um it can be a bit uh of a
+hassle to just open a pr to the hugging
+face uh library because you know you
+need all those tests to work you need
+all those all this documentation to work
+and maybe what you're trying to solve is
+like maybe you're not actually trying to
+get it contributed you're just trying
+things out but you still want other
+people to use it so the best way to do
+that right now is just to fork the repo
+push your changes and then ask that
+people to to use that fork instead but
+with silvan's work you can actually just
+push the updated model files the updated
+token as request with the hub and then
+as soon as anybody wants to use them uh
+they can just say okay i trust the files
+in that repository let me just use them
+and it will use these files alongside
+the model weights
+awesome so that means i can do like from
+pre-trained and it just works
+yeah basically you will still need to
+specify that you're okay with loading a
+remote code from that repository because
+otherwise it's a big security risk but
+as long as you say that um that's
+perfect
+awesome
+great so i think we're now ready for our
+next speaker is that right silvan
+all right one last question so can we
+use git tags in the hub for model
+version
+absolutely absolutely basically all
+repositories and on the hub are
+traditional get repost so anything that
+works with a git repos will work on the
+hub
+awesome
+um so why should we introduce the next
+speaker or should we keep asking this
+andrea
+another chat i have i have a long list
+of questions
+okay
+so
+another question that um
+maybe it would be interesting to hear
+about is um like if i want to
+let's say
+collaborate with someone
+on a project so this is going to happen
+in the next couple of days for people
+who are building their own nlp projects
+what would be the kind of best place to
+start
+uh sure so to collaborate on a new
+project you'll need to go on the forum
+let me just finish what i was replying
+on the other topic and then i'll share
+my screen
+it's going to come in one minute
+so
+yes here is
+the forearms
+and if you go
+directly on them you should land on a
+page that looks like this
+and you should go on the course category
+and more specifically under the course
+project subcategory
+and there you will see that there is a
+lot of topics
+one per project basically so you can
+either browse the existing topics to
+join a project that sounds exciting or
+you can create your own project by
+creating a new topic there and have
+people uh try and join your project so
+for instance let me pick one that was
+community contributed
+recently a project to create a new zero
+shot
+uh model with analyte data so you should
+make sure to add the description any
+retrain mode you could use any data sets
+you could use for fine tuning
+the challenges you envision in this
+project and the desired project outcome
+uh which is a space uh
+on the the wicking face co website so
+we'll have a presentation on spaces a
+little bit later today that will tell
+you about it
+and so once uh you've done all that
+if you are joining a new project or
+creating one you should create a discord
+channel on our discord server
+and then you can
+live chat with with your team co-workers
+on your project directly for that
+one very important post is
+the one that will be pinned for you
+the first time you get to that category
+which
+has all the rules
+displayed uh the main thing is uh to
+benefit from the frequent free compute
+from aws uh search maker uh is that you
+have to fill out the form that is linked
+there uh wherever you will actually give
+your email address to to amazon search
+maker so that they can email you a link
+to the account the free accounts will be
+using for the event so those accounts
+will be available uh starting tomorrow
+and until friday for three days
+and that's pretty much it i think we're
+ready for our next speaker louise what
+do you think
+yeah sounds great so let me add this
+hello
+so
+hey
+do we have some background noise
+yeah you seem to have some background
+noise on your side you see
+okay
+[Music]
+is that better
+yep tiny bit better it's still a little
+bit there so if you can amplify what you
+are doing a little bit more i don't know
+what about now
+we can hear a lot of the background and
+now he's
+on your side
+but in any case maybe what we can do is
+i'll introduce you and watch the video
+and then we can uh you know think about
+solving this in the q a
+um or before yeah um so
+for everyone this is uh lucy
+solnier i hope i pronounced your name
+right
+um vasila is a machine learning engineer
+at hugging face and she develops and
+supports the use of open source tools
+she's also actively involved in many of
+the research projects in the field of
+nlp such as a really cool project about
+collaborative training so this is where
+you try to basically train like a
+transformer from scratch
+distributed across multiple machines in
+the world so people share their kind of
+compute for this it's a really cool
+project you should check out
+and we have it on the blog
+and she's also heavily involved in the
+big science project which um you may
+have heard about this is a one-year
+kind of research endeavor to try and
+train a very large language model that
+is kind of like gpt3
+but hopefully with a lot more insight
+into how this model works
+and today she's going to explain to us
+how to get our own tokenizer with
+hugging face transformers and
+hugging face tokenizers libraries
+so thanks lucille and we'll see you for
+the questions
+hello everyone i'm really happy to be
+with you today for the launch of part 2
+of our course
+what i wanted to propose to you today is
+to see how you can get your own
+tokenizer with the transformers on
+tokenizer's organ face libraries
+what i'm going to say next will be
+mostly for the purpose of using training
+a language model
+but be aware that you can absolutely
+meet tokenizers in other contexts
+so
+what is a tokenizer
+a tokenizer is a component located
+between
+the textual data
+and the language model
+it is in charge of preparing the data in
+other words putting the data in the
+format expected by the language model
+more specifically a tokenizer
+is responsible for dividing
+the text into sequence of smaller units
+called tokens
+the big point is
+that this tokenizer is coupled with a
+vocabulary that maps each token with a
+unique number
+in this way the tokenizer transforms a
+row text into a sequence of numbers
+do that because a language model is a
+function that can only take numbers as
+input
+the tokenizer is is thus really designed
+and trained to be the best adapted to
+the data on the language model
+on this apply to all the sub operations
+included in the tokenizer from
+normalization to post-processing
+so when you want to train a language
+model you will ask yourself the question
+what should i do with the tokenizer
+the first possibility is that there is
+already a train tokenizer that fits
+your needs very well and in this case
+the question is quickly solved
+on the other hand if you do not find
+such tokenizer you can perhaps find a
+tokenizer
+whose design is appropriate to you but
+that you will need to adapt to your data
+in other words only to retrain it
+or you perhaps want to completely design
+your own tokenizer on training in your
+data this is the third case showed here
+the good news is that again face
+libraries have put everything in place
+so that you can do everything whether
+you are in
+the first case the second size or the
+third case
+the course that was just released has a
+very detailed chapter on tokenizers and
+will allow you to really understand
+everything about tokenizer on how to get
+your home organizer
+so i thought it might be interesting to
+show you another resource
+that show use on a new you know a simple
+example of all you could do if you are
+in the case two or three just discussed
+before
+this should give you a little bit of an
+appetizer before you start the course
+so i'm going to leave this presentation
+and move on to the notebook
+you may already know them but you can
+find in the transformer repository a
+series of notebooks that explain concept
+or or how to perform several tasks on
+among them
+you can find one called try new
+tokenizer
+to save some time i already
+or download it
+to run it locally
+a little extra information as
+interesting to do it locally
+so here
+you will need to have installed the data
+set on transformers packages
+with
+one extra dependency which is sentence
+piece
+so you can see here that i have
+everything installed before
+then whether it's for case two or three
+that we just discussed before you will
+need to train a tokenizer model and so
+for that we you will need some data
+if you plan to train a language model
+afterwards you just need to take a
+subpart of your training data
+for this example we will still need data
+and we will take the wiki text tool
+we can load it directly with the dataset
+library
+which allow us to consult it very easily
+we can see it's composed of 36 000 text
+we can also look at
+the first
+example or even the first five
+what we need next is an iterator on our
+data
+so we are going to do that right now
+you can see with this cell that's the
+simple way to do it but it's not very
+suitable because it lost everything in
+memory
+so it's better to use the battery terton
+method defined just below
+we will now see the solution to the
+situation two of earlier that is to say
+that you have found a fast organizer
+whose design suits you but not its
+training
+in this notebook we will say that the
+design that suits us is the one of gpt2
+so we load this tokenizer
+and we check that it's really a fast
+organizer
+on that we just have to use the train
+new from interactive method to train it
+again on our data
+um
+after it's trained we can see what it
+gives on our data set
+and that's all
+the
+new tokenizer is ready so maybe it's a
+good idea to save it
+and we can even send it directly to the
+app to get it from everywhere and share
+it with other people
+so if you want to do that
+you just need to run this cell
+on fill in your again fast credentials
+okay and you you will also need
+to have git large files to write
+installed
+so if you don't you can do it by
+uncommenting this line
+and there you go
+you can load it on the app
+after that very easily you can check
+with this line if you can retrieve it so
+here it's the case
+and that's all
+the case 2 is finished
+so now we can
+we can do we can see how we can do when
+we really want to make a complete
+tokenizer from scratch
+on first that we will use the tokenizers
+library
+for this example we will remake the
+tokenizer of bert
+but you can really imagine everything
+so to start
+we'll initialize a tokenizer with a
+model of our choice
+belt uses wordpiece so we will use
+wordpiece here too
+if you remember my little diagram at the
+beginning of this talk
+there are also other operations that we
+can define in our tokenizer
+the first one is the normalization
+so we can use directly the burst
+normalizer
+or we could redefine the sequence of
+normalizer it's the same
+well it's almost the same you can check
+at the course to understand what could
+be missing here
+then we can define the pre-organization
+operation
+we can't
+we can take the opportunity to see
+the results on an example
+so here you can see that the words have
+been
+separated from each other
+and now
+that we have defined all the operations
+of stream of the model we can train the
+model
+so uh to train wordpiece there are two
+arguments that are particularly
+important
+there is the special
+tokens
+and
+the vocab sites
+in the special tokens we have to list
+all the special tokens that we want
+to add to our vocabulary
+the vocab cells will define the final
+size of the vocabulary
+that we want at the end of the training
+so we launch a training
+um once it's finished we can define the
+operations that follow the model
+so
+the next operation is the post
+processing
+to define our post processing we need to
+know the idea of two special tokens that
+we want to add to our sequences
+so indeed birds need to add the class
+token at the beginning of each example
+on the separation token between two
+sentences and at the end of each example
+so once
+we have retrieved them
+we can
+add them in our template
+processor um we can also indicate that
+the opal should not contain only the
+sequence of ids corresponding to the
+tokens but also another sequence
+indicating the type of each i each token
+here we will indicate that the tokens
+belonging to the first sentence should
+be linked with a type fd of 0
+or 1 otherwise
+um
+so let's look um
+at what it gives
+on an example
+we can
+see here as a
+result in tokens and we can see that the
+cluston on the septums have been added
+to the final sequence of the case
+we can also look at the type ids on the
+tokens belonging to the first sequence
+are indeed linked to 0
+or 1 otherwise
+finally to finish our design we have to
+tell the decoder that we have used a
+wordpiece model
+on that we should gather the tokens
+started with two hashtags with the
+previous topic
+so at this point we have finished
+designing art organizer and to be able
+to use it with a language model we can
+load it into a tokenizer fast from the
+transformers library
+and that's it it's finished you have a
+tokenizer which is ready to be used
+so after that you can see that the
+notebook shows
+another example
+even another one
+so don't hesitate to test it yourself
+of course in this stroke i didn't have
+the time to deal with everything
+but i could simply give you an overview
+of what you can do with transformers on
+tokenizers libraries
+i say that the beginning of this talk
+the part two of the course as a wall
+chapter dedicated to the tokenizer
+and i really hope that you could find a
+lot of useful information there
+in order to
+get really your own token either
+i associate that we use the remaining
+time for any question you might have
+welcome back
+and thank you very much for that really
+nice look this is it it's very
+informative and it's um cool to see the
+kind of inner workings of a tokenizer
+so we have a couple of questions um i
+think you kind of mentioned this a bit
+in the talk um but it'd be nice to just
+maybe expand a bit on it so the first
+question is
+when should i train a tokenizer from
+scratch
+and why can't i just always use one from
+the hanging face hub
+um
+so you will have more information in the
+course about this uh
+question in particular
+but the tokenizer is really something
+that you need to adapt it both to your
+data on your model so
+you can't use for example a tokenizer
+which is not formatted for your model
+and you will see that some tokenizer
+had additional special tokens so
+for example so you have to be careful
+about what's it added with the tokenizer
+um but you also need to be adapted to
+the data um for example you can try
+different tokenizer on your data and if
+you saw that some splitting is
+really weird on the taxi split and
+really a lot a lot a lot of tokens
+might not be
+really fitted to your data um
+yes i think the best test to do is to
+test an english tokenizer there is a lot
+of english techniques on the app and
+test it on a really different language
+like for example indie and you will see
+that
+it's not the best it's the best fit you
+can find
+maybe just to ask then a follow-up
+question is you said okay suppose i have
+a tokenizer that is not really well
+adapted to my data set then it will
+typically chop it up into like you know
+many sub tokens
+why should i worry about this what's the
+kind of problem with that
+and the first one is um you can see with
+a lot of language model you have
+a sequence of limited lengths
+so for example bert sits
+512
+on the most you can find is 248
+and so if you take too much
+tokens to say not much you will at the
+end not have a lot of context uh to give
+to your models on it's really uh
+something which is great with the
+transformer models is really to use them
+as much as context as planned
+in our invention layer so that's why it
+can be problematic
+awesome and i think another thing that
+i've experienced is that um if you have
+very long sequences then you actually
+also get penalized because attention is
+usually you know a kind of slow
+computation so you kind of get two
+problems you get one is like you don't
+get enough information and two
+your training is slower um
+so this actually raises a another
+question which is kind of this was for
+me actually kind of surprising the first
+time i learned about tokenization so
+people say oh you know you train the
+tokenizer with bur and i think this is
+quite a different beast so maybe you'd
+like to tell us a little bit about what
+that what that means
+yes that's a very very relevant question
+and yes we we are talking about training
+at organizer but we don't train the
+tokenizer in the same way we train
+models um a tokenizer is much it's it's
+more like a statistical learning uh but
+we need to do some computation over uh
+our training data set in order to
+extract uh some data
+that the token as a tokenizer need to
+use to total in a sentence so for most
+of the tokenizer a tokenizer will need
+to learn a vocabulary which is a list of
+tokens that he knows
+awesome thanks that's really informative
+we have a question now from alexia i'll
+just put it up here
+and they ask
+how would you use special tokens to
+introduce more complicated structures of
+the data entries for example if every
+entry is a dialog then each utterance is
+often separated by an end of sequence
+token
+i'm not sure to get exactly where the
+question is is it really
+a technical question
+um
+yeah my understanding of the question
+was is like
+we know that we have these special
+tokens in all these tokenizers like for
+example in bert there's the cls token or
+the sep token
+and um this is kind of a choice by you
+know the designers of the models how
+they want to encode some information
+that's like sort of special to indicate
+you know sentence structure or whatever
+so the question is like if you're doing
+something like biology or law or
+something
+could special tokens help in that
+context
+uh
+in this sense yes i think they can
+definitely help
+um
+i'm
+sorry i don't have i think uh really uh
+a good advice to give on how to use
+these special tokens but yes you can
+definitely leverage special seconds in
+order to tell the model that
+between these two special tokens
+it's a question between these two
+special tokens it's the answer you can
+relate we
+use the special equipment
+the best way to do it technically
+is to
+put them in the template processor part
+of your tokenizer from the tokenizers
+library
+awesome
+yeah and this is actually a kind of
+related problem so
+when you work in industry you often have
+like a domain that is quite different
+from say wikipedia which is where bert
+and all these other models are trained
+on and so you get this kind of outer
+vocab uh problem where a token maybe
+doesn't belong
+in the vocabulary of the organizer i was
+just wondering like how do you how do
+you think about this problem and are
+there some good strategies that we can
+use to deal with it
+that's a really good question too um one
+solution to the out of vocabulary
+problem is to use a
+bite level tokenizer so what we'll do
+about cable tokenizer is like the very
+fundamental unit you will use it's a
+byte and we only have 258
+values for bytes so it can define we can
+definitely store all the values of a
+byte in our vocabulary
+on
+doing that we will be able to tokenize
+any new text we can fill afterwards
+there is also another solution proposed
+to this problem but it's really more at
+the stage of research i would say it's
+really token either so based um at the
+at the unit level so the bite you have
+by t5 for example
+but that's more really um recent token
+either and it's not the more common that
+we can find for our language model
+cool thank you very much that's a really
+useful tip um maybe one last question is
+is more personal so could you tell us a
+little bit about what work you do in the
+big science project
+yeah sure
+so um
+i will not have the time to really give
+you the whole
+view over what big science is but it's
+really a research project project with
+seven england researchers so to organize
+everything these researchers are uh
+working together in working groups so
+i'm personally part of
+two of these working groups um from one
+i'm mainly helping on the engineering
+side so really running big experience on
+putting big one on a really big super
+computer which called zhang
+and with another working group and we're
+working
+on great design and research sites and
+we are already us
+studying one question in order to see if
+we can improve in a way uh the training
+of laboratories and give them
+more capabilities
+cool thank you
+and
+i think we have a minute left so maybe
+i'll ask you one last question what is
+your favorite tokenization algorithm and
+why
+i think they're using gremlin
+i like
+the probabilistic
+approach great
+thank you thank you
+yeah thanks a lot for your talk and your
+all the answers to the questions
+great so the next speaker is silvan
+and i think silvan
+doesn't need an introduction to
+basically anyone here but i'll um i'll
+do my best
+so um
+sylvan is a research engineer at hugging
+face and he's one of the core
+maintainers of transformers and the
+developer behind hugging pace accelerate
+and he likes making model training more
+accessible and building many of the sort
+of fundamental tools that we use like
+the trainer for example that we
+explained today
+and a little personal comment sylvan was
+actually a great inspiration to me um
+because i read your blog post about how
+you went on this journey from becoming a
+kind of math
+teacher or in france and kind of
+self-taught yourself how to do deep
+learning with fast ai and then working
+with jeremy and uh this uh this story is
+really cool and i think people should
+read this to get a sense of like how you
+can really break into this field with a
+ton of hard work but um
+it really really encouraged me because i
+came from a different field myself and
+it was nice to see that as possible
+thanks
+so silvan's going to talk to us today
+about supercharging your pi torch
+training route loop with hugging face
+accelerate so let me just add
+the file
+um here we go
+so
+this
+ah interesting
+um
+so stream yard says no one second oh
+let me try again
+uh
+oh so stream out says there's an issue
+okay so
+let me i might have to
+leave for one second it says okay or
+maybe maybe sound if you want to try
+from backstage
+okay so that's super fun
+i can try on my side otherwise
+okay yes i have exactly the same issue
+okay so it might be a stream yard
+problem let's see um
+maybe
+i will even come back and let's see if
+turning it on and off again makes it
+work
+thanks
+and sorry about the technical issues
+today
+i guess we should have tested
+for two hours
+instead of just for five or ten minutes
+okay it seems like people have trouble
+coming back to the stream
+[Music]
+okay we might have to
+just shut down the stream and create a
+new one
+uh let me
+yeah sorry about that let me end the
+broadcast and we'll share uh the news
+the new link
+from the forums and from twitter
+and from pretty much everywhere
+there seems to be
+this stream seems to be corrupted and
+they are not able to join back
+so see you in a minute
+i can't even end the stream so that's
+super fun
+okay
+you
